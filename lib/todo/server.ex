@@ -12,7 +12,7 @@ defmodule Todo.Server do
 
   @impl GenServer
   def handle_call({:entries, date}, _, todo_list) do
-    {:reply, {Todo.List.entries(todo_list, date)}, todo_list}
+    {:reply, Todo.List.entries(todo_list, date), todo_list}
   end
 
   @impl GenServer
