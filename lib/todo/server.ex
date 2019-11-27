@@ -1,23 +1,23 @@
 defmodule Todo.Server do
   use GenServer
 
-  def start do
-    GenServer.start(Todo.Server, nil)
+  def start(todo_list_name) do
+    GenServer.start(Todo.Server, todo_list_name)
   end
 
   @impl GenServer
-  def init(_) do
-    {:ok, Todo.List.new()}
+  def init(todo_list_name) do
+    {:ok, {todo_list_name, Todo.List.new()}}
   end
 
   @impl GenServer
-  def handle_call({:entries, date}, _, todo_list) do
-    {:reply, Todo.List.entries(todo_list, date), todo_list}
+  def handle_call({:entries, date}, _, {_, todo_list} = state) do
+    {:reply, Todo.List.entries(todo_list, date), state}
   end
 
   @impl GenServer
-  def handle_cast({:add_entry, new_entry}, todo_list) do
-    {:noreply, Todo.List.add_entry(todo_list, new_entry)}
+  def handle_cast({:add_entry, new_entry}, {todo_list_name, todo_list}) do
+    {:noreply, {todo_list_name, Todo.List.add_entry(todo_list, new_entry)}}
   end
 
   # TODO add support for update_entry and delete_entry
