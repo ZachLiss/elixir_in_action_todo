@@ -7,7 +7,7 @@ defmodule Todo.Server do
 
   @impl GenServer
   def init(todo_list_name) do
-    {:ok, {todo_list_name, Todo.List.new()}}
+    {:ok, {todo_list_name, Todo.Database.get(todo_list_name) || Todo.List.new()}}
   end
 
   @impl GenServer
@@ -17,7 +17,9 @@ defmodule Todo.Server do
 
   @impl GenServer
   def handle_cast({:add_entry, new_entry}, {todo_list_name, todo_list}) do
-    {:noreply, {todo_list_name, Todo.List.add_entry(todo_list, new_entry)}}
+    new_list = Todo.List.add_entry(todo_list, new_entry)
+    Todo.Database.store(todo_list_name, new_list)
+    {:noreply, {todo_list_name, new_list}}
   end
 
   # TODO add support for update_entry and delete_entry
