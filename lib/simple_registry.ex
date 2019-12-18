@@ -7,6 +7,7 @@ defmodule SimpleRegistry do
 
   @impl GenServer
   def init(_) do
+    # Process.flag(trap_exit: true)
     {:ok, %{}}
   end
 
@@ -17,6 +18,7 @@ defmodule SimpleRegistry do
         {:reply, :error, state}
 
       false ->
+        Process.link(caller)
         {:reply, :ok, Map.put(state, process_key, caller)}
     end
   end
@@ -30,6 +32,18 @@ defmodule SimpleRegistry do
       nil ->
         {:reply, nil, state}
     end
+  end
+
+  @impl GenServer
+  def handle_info({:EXIT, pid, _reason}, state) do
+    IO.puts("pid EXIT: #{pid}")
+
+    {registered_key, _} =
+      state
+      |> Enum.find(fn {_, value} -> value == pid end)
+
+    # there could be multiple keys for any pid... we need all of them
+    {:noreply, Map.delete(state, registered_key)}
   end
 
   def register(process_key) do
