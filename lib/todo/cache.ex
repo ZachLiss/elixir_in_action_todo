@@ -12,14 +12,22 @@ defmodule Todo.Cache do
     DynamicSupervisor.start_link(name: __MODULE__, strategy: :one_for_one)
   end
 
-  defp start_child(todo_list_name) do
-    DynamicSupervisor.start_child(__MODULE__, {Todo.Server, todo_list_name})
+  def server_process(todo_list_name) do
+    existing_process(todo_list_name) || new_process(todo_list_name)
   end
 
-  def server_process(todo_list_name) do
+  def existing_process(todo_list_name) do
+    Todo.Server.whereis(todo_list_name)
+  end
+
+  def new_process(todo_list_name) do
     case start_child(todo_list_name) do
       {:ok, pid} -> pid
       {:error, {:already_started, pid}} -> pid
     end
+  end
+
+  defp start_child(todo_list_name) do
+    DynamicSupervisor.start_child(__MODULE__, {Todo.Server, todo_list_name})
   end
 end

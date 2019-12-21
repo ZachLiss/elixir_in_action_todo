@@ -3,7 +3,8 @@ defmodule Todo.System do
     Supervisor.start_link(
       [
         # Todo.Metrics,
-        Todo.ProcessRegistry,
+        # ProcessRegistry is no longer needed after switching to a distributed model
+        # Todo.ProcessRegistry,
         Todo.Database,
         Todo.Cache,
         Todo.Web
